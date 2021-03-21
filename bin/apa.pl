@@ -9,7 +9,7 @@ binmode(STDOUT, ':encoding(UTF-8)'); # warning: wide character
 
 my $apa = App::APA -> new();
 
-fif ( defined($options{f}) ) {
+if ( defined($options{f}) ) {
   say $apa -> first();
 }
 elsif ( defined($options{n}) ) {
