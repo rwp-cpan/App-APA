@@ -1,3 +1,5 @@
+# ABSTRACT: Access APA News via RSS
+
 use v5.37.9;
 use experimental qw( class try builtin );
 use builtin qw( true false trim );
