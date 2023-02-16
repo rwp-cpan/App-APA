@@ -1,0 +1,61 @@
+#! /usr/bin/env perl
+
+use v5.37.9;
+
+use lib '/home/regular/IdeaProjects/App-APA/lib';
+
+use Getopt::Std; # function: getopts
+use Pod::Usage;  # function: pod2usage
+use App::APA;
+
+getopts( '1fl:a' , \our %options );
+binmode( STDOUT , ':encoding(UTF-8)' ); # warning: wide character
+
+my $apa = App::APA -> new();
+
+if ( defined( $options{f} or $options{1} ) ) {
+  say $apa -> first_item;
+}
+elsif ( defined( $options{l} ) ) {
+  say for $apa -> limit_items( $options{l} );
+}
+elsif ( defined( $options{a} ) ) {
+  say for $apa -> all_items;
+}
+else {
+  say pod2usage( verbose => 1 );
+}
+
+=pod
+
+=head1 NAME
+apa - App::APA frontend to parse RSS news
+
+=head1 SYNOPSIS
+apa -f
+apa -n <number>
+apa -a
+
+=head1 DESCRIPTION
+
+=head2 OPTIONS
+
+=over
+
+=item -f
+=item -1
+First news item
+
+=item -l
+Fetch specified number of news items
+
+=item -a
+All news items
+
+=back
+
+=head1 SEE ALSO
+
+L<XML::RSS>
+
+=cut

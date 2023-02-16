@@ -1,44 +1,81 @@
+use v5.37.9;
+use experimental qw( class try builtin );
+use builtin qw( true false trim );
+
 package App::APA;
-use v5.32;
-use experimental qw(signatures);
+
+class App::APA;
+
 use HTTP::Tiny; # methods: get
 use URI;
 use XML::RSS; # methods: parse
 
-my $http = HTTP::Tiny -> new();
-my $uri = URI -> new('https://apa.az/en/rss');
-my $rss = XML::RSS -> new();
+field $uri = URI -> new( 'https://apa.az/en/rss' );
 
-my $content = $http -> get($uri) -> {content}; # \%
-$rss -> parse($content);
-my @items = $rss -> {items} -> @*; # \@ of \% (keys: title, pubDate)
+my $http = HTTP::Tiny -> new;
+my $rss = XML::RSS -> new;
 
-sub new($class) {
-  return bless({ url => $uri }, $class);
+# TODO: Make this a private method once supported
+method get_items ( ) {
+  my $content = $http -> get( $uri ) -> {content}; # Hashref
+  $rss -> parse( $content );
+  my @items = $rss -> {items} -> @*; # Arrayref of hashrefs (keys: title, pubDate)
+  return @items;
 }
 
-sub first($object) {
-  return $items[0] -> {title} =~ s(^\s+|\s+$)()gr;
+method uri ( ) {
+  return $uri;
 }
 
-sub number($object, $number) {
+=attr uri
+
+Return the URL of the news website
+
+=cut
+
+method first_item ( ) {
+  my @items = $self -> get_items;
+  return trim $items[0] -> {title};
+}
+
+=method first_item()
+
+Returns the first item of the recent news list
+
+=cut
+
+method limit_items ( $number ) {
+  my @items = $self -> get_items;
   my @number;
-  for (0 .. $number - 1)
-  {
-    push( @number, $items[$_] -> {title} =~ s(^\s+|\s+$)()gr );
+  for ( 0 .. $number - 1 ) {
+    push @number , trim $items[$_] -> {title};
   }
   return @number;
 }
-    
-sub all($object) {
+
+=method limit_items($number)
+
+Returns the number of items specified from the recent news list
+
+=cut
+
+method all_items ( ) {
+  my @items = $self -> get_items;
   my @all;
-  for my $item (@items) {
-    push( @all, $item -> {title} =~ s(^\s+|\s+$)()gr );
+  for my $item ( @items ) {
+    push @all , trim $item -> {title};
   }
   return @all;
 }
 
-1;
+=method all_items($object)
+
+Returns all items in the news list
+
+The default limit for this is 300
+
+=cut
+
 
 =pod
 
